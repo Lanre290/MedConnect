@@ -5,7 +5,7 @@ require('script.php');
 if($_SERVER['REQUEST_METHOD'] == "POST"){
     if(empty($_POST)){
         echo "unexpected response";
-        exit();
+        exit(); 
     }
     else{
 
@@ -64,6 +64,24 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
 
             echo json_encode($response);
 
+        }
+
+        if(isset($_POST['type']) && $_POST['type'] == "addNewProgress" && isset($_POST['data'])){
+            $data = json_decode($_POST['data']);
+
+            $value = $data->value;
+
+            $user = new userAction();
+            $response = $user->addNewProgressTracker($value);
+
+            echo $response;
+        }
+
+        if(isset($_POST['type']) && $_POST['type'] == "getAdditionalProgress"){
+            $user = new userAction();
+            $response = $user->getAdditionalProgress();
+
+            echo $response;
         }
     }
 }

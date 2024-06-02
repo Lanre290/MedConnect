@@ -57,7 +57,7 @@
 
         <div class = "flex-row" style = "height: 100%;">
             <div class="lhs_body placcard">
-
+                <?php include "server/circular_progress.php";?>
             </div>
             <div class="rhs_body">
                 <div class="rhs_deck flex-row" >

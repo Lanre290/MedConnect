@@ -24,7 +24,7 @@ function updateNewProgress(){
     let currentProgress = document.getElementById("current_progress")
     let error = 0;
 
-    [value, description, currentProgress].forEach(element => {
+    [value, currentProgress].forEach(element => {
         if(element.value.length < 1){
             error++;
             element.classList.add("custom_input_err");
@@ -142,9 +142,10 @@ function plotGraph(){
                             elem.title = `${values[i]["value"]} - ${values[i]["description"]} at ${values[i]["date"]}`;
 
                             let placcard = document.createElement("div");
-                            placcard.classList.add("placcard","pt_points_placcard","flex-row", "align-center");
+                            placcard.classList.add("placcard","pt_points_placcard","flex-column", "align-center");
                             placcard.style.backgroundColor = bgColor;
-                            placcard.innerText = values[i]["value"];
+                            placcard.innerHTML = values[i]["value"];
+                            placcard.innerHTML += `<div class = "mobile-elem align-center">${values[i]["description"]} at ${values[i]["date"]}</div>`;
 
                             elem.appendChild(placcard);
                             chartArea.appendChild(elem);      
@@ -161,8 +162,94 @@ function plotGraph(){
     }
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.send(`type=getProgress&data=${value}`);
+
+    getAdditionalProgress();
 }
 
+function isMobile() {
+    const screenWidth = window.innerWidth;
+
+    return screenWidth <= 768;
+}
+
+if(isMobile()){
+    document.querySelectorAll(".pt_points").forEach(element => {
+        element.addEventListener("contextmenu",() => {
+            element.getElementsByClassName(".mobile-elem")[0].style.display = "flex";
+        });
+    });
+}
+
+function addNewProgressTracker(element) {
+
+    try {
+        if(element.value.length < 1){
+            element.classList.add("custom_input_err")
+            throw new SyntaxError(`Unexpected response`);
+        }
+        let data = {
+            "value" : element.value
+        }
+    
+        let xhr = new XMLHttpRequest();
+        document.getElementById("loading_screen").style.display = "block";
+        xhr.open("POST", "server/router.php", true);
+        xhr.onprogress = () => {
+            document.getElementById("loading_bar").style.width = `${(xhr.readyState/xhr.DONE)*100}%`;
+        }
+        xhr.onload = ()=>{
+            if(xhr.readyState === XMLHttpRequest.DONE){
+                if(xhr.status === 200){
+                    let data = xhr.response;
+                    document.getElementById("loading_bar").style.width = "100%";
+                    document.getElementById("loading_screen").style.display = "none";
+                    document.getElementById("tp_add_new_bc").style.display = "none";
+                    element.value = "";
+    
+                    console.log(data);
+                    if(data != true){
+                        showError("Error connecting to database");
+                    }
+
+                }
+            }
+        }
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.send(`type=addNewProgress&data=${JSON.stringify(data)}`);
+    } catch (error) {
+        showError(error);
+    }
+}
+
+
+function getAdditionalProgress(){
+    let xhr = new XMLHttpRequest();
+        document.getElementById("loading_screen").style.display = "block";
+        xhr.open("POST", "server/router.php", true);
+        xhr.onprogress = () => {
+            document.getElementById("loading_bar").style.width = `${(xhr.readyState/xhr.DONE)*100}%`;
+        }
+        xhr.onload = ()=>{
+            if(xhr.readyState === XMLHttpRequest.DONE){
+                if(xhr.status === 200){
+                    let data = xhr.response;
+                    document.getElementById("loading_bar").style.width = "100%";
+                    document.getElementById("loading_screen").style.display = "none";
+    
+                    console.log(data);
+                    if(data == "err"){
+                        showError("Error connecting to database");
+                    }
+                    else{
+                        document.getElementById("user_additional_progress").innerHTML = data;
+                    }
+
+                }
+            }
+        }
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.send(`type=getAdditionalProgress`);
+}
 
 document.getElementById("current_progress").addEventListener("input", plotGraph);
 
@@ -170,3 +257,7 @@ document.getElementById("current_progress").addEventListener("input", plotGraph)
 
 plotGraph();
 document.getElementById("refresh-graph-btn").addEventListener("click",plotGraph);
+
+document.getElementById("tp_add_new_submit_btn").addEventListener("click",() => {
+    addNewProgressTracker(document.getElementById("tp_add_new_input"));
+});

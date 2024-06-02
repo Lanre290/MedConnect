@@ -17,7 +17,10 @@
 <body>
     <?php 
         
-    include_once "server/header.php";
+        include_once "server/header.php";
+        include_once "server/db.php";
+        $id = $_SESSION['id'];
+
     ?>
 
     <div class="flex-column">
@@ -30,9 +33,19 @@
                     <option value="calories">Calories</option>
                     <option value="glucose">Glucose</option>
                     <option value="waters">Waters</option>
+                    <div id = "user_additional_progress">
+                        <?php 
+                            $added_progress_query = mysqli_query($conn, "SELECT * FROM user_progress WHERE user_id = '$id'");
+                            while($assoc = mysqli_fetch_assoc($added_progress_query)){
+                                echo '<option value="'.$assoc['progress_value'].'">'.$assoc['progress'].'</option>';
+                            }
+                        ?>
+                    </div>
                 </select>
-                <button class="add_new_pt placcard" id = "tp_enter_new_value">Enter Value</button>
-            <button class="tp_add_new_close_btn" title= "refresh" id = "refresh-graph-btn"><i class="fa fa-refresh"></i></button>
+                <div class="flex-row align-center mobile-ml-25">
+                    <button class="add_new_pt placcard" id = "tp_enter_new_value">Enter Value</button>
+                    <button class="tp_add_new_close_btn mobile-ml-10" title= "refresh" id = "refresh-graph-btn"><i class="fa fa-refresh"></i></button>
+                </div>
             </div>
             <button class="add_new_pt placcard" id = "track_new_progress_btn">Track new Progress</button>
         </div>
@@ -53,9 +66,9 @@
                 <button class="tp_add_new_close_btn" id = "tp_add_new_close_btn"> <i class="fa fa-close"></i> </button>
             </div>
 
-            <input type="text" class="custom_input tp_inputs" placeholder = "Name">
+            <input type="text" class="custom_input tp_inputs" id = "tp_add_new_input" placeholder = "Name">
 
-            <button class="add_new_pt placcard m-auto">Ok</button>
+            <button class="add_new_pt placcard m-auto" id = "tp_add_new_submit_btn">Ok</button>
 
         </div>
     </div>

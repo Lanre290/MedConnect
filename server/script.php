@@ -1,5 +1,7 @@
 <?php
 session_start();
+include_once "db.php";
+
 
     class User{
         public function __construct($user_id = "",$uname = "",$pwd = "") {
@@ -33,7 +35,6 @@ session_start();
         public function signIn(){
             $conn = mysqli_connect("localhost", "root", "", "datican");
 
-
             $check_username = mysqli_query($conn, "SELECT * FROM users WHERE username='$this->username'");      //check if username exists in database and raise an error if it does
             if(mysqli_num_rows($check_username) == 0){
                 return "Username does not exists";
@@ -65,9 +66,10 @@ session_start();
         }
 
         public function register(){
+            $conn = mysqli_connect("localhost", "root", "", "datican");
             $emailPattern = '/^[^\s@]+@[^\s@]+\.[^\s@]+$/';          //initialise email pattern woth regex.
             $stringPattern = '/^[a-zA-Z\s]+$/';                              //initialize string with regex.
-            $conn = mysqli_connect("localhost", "root", "", "datican");
+            
             $error = 0;
 
             if(empty($this->name) || empty($this->uname) || empty($this->email) || empty($this->gender) || empty($this->pwd) || empty($this->dob)){
@@ -169,6 +171,45 @@ session_start();
             }
             else{
                 return $out_arr;
+            }
+        }
+
+        public function addNewProgressTracker($progress){
+            $conn = mysqli_connect("localhost", "root", "", "datican");
+            if(empty($progress)){
+                return "Unexpected response.";
+            }
+            else{
+                
+                $id = $_SESSION["id"];
+                $progress_value = str_replace(" ", "_", strtolower($progress));
+
+                $query = mysqli_query($conn, "INSERT INTO user_progress(user_id, progress, progress_value) VALUES('$id','$progress','$progress_value')");
+
+                if(!($query)){
+                    return "Error connecting to database.";
+                }
+                else{
+                    return true;
+                }
+            }
+        }
+
+        public function getAdditionalProgress(){
+            $conn = mysqli_connect("localhost", "root", "", "datican");
+            $id = $_SESSION['id'];
+            $out_string = "";
+
+            $query = mysqli_query($conn, "SELECT * FROM user_progress WHERE user_id = '$id'");
+            while($assoc = mysqli_fetch_assoc($query)){
+                $out_string = $out_string.'<option value="'.$assoc['progress_value'].'">'.$assoc['progress'].'</option>';
+            }
+
+            if(!($query)){
+                return "err";
+            }
+            else{
+                return $out_string;
             }
         }
     }
