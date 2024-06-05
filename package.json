@@ -1,0 +1,16 @@
+{
+  "name": "medconnect",
+  "version": "1.0.0",
+  "description": "A healthcare assistant chatbot using Google Generative AI",
+  "main": "ai.js",
+  "type": "module",
+  "scripts": {
+    "start": "node ai.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^1.0.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

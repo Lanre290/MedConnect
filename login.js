@@ -62,6 +62,7 @@ function proceed(){
     document.getElementById("preamble").style.display="none";
     document.getElementById("main").style.display="block";
 }
+
 function def(){
     document.querySelectorAll(".input_fields").forEach(element=>{
         element.classList.remove("error");
@@ -70,6 +71,58 @@ function def(){
         element.parentElement.getElementsByClassName("fa")[0].classList.add("fa-question-circle");
         element.parentElement.getElementsByClassName("fa")[0].classList.remove("fa-check-circle");
     });
+}
+
+
+function signIn(uname, pwd){
+    let isError = false;
+
+    
+
+
+    if(!isError){
+        document.getElementById("bc_loading").style.display="block";
+
+
+        var formData = {
+            "username": uname,
+            "pwd": pwd
+        }
+
+
+        let xhr = new XMLHttpRequest();
+        xhr.open("POST", "server/router.php", true);
+        xhr.onprogress = () => {
+            document.getElementById("loading_bar").style.width = `${(xhr.readyState/xhr.DONE)*100}%`;
+        }
+        xhr.onload = ()=>{
+            if(xhr.readyState === XMLHttpRequest.DONE){
+                if(xhr.status === 200){
+                    let data = xhr.response;
+                    console.log(data);
+                    document.getElementById("bc_loading").style.display="none";
+                    
+                    try {
+                        JSON.parse(data);
+
+                        data = JSON.parse(data);
+                        if(data.success == true){
+                            window.location.href = `index.php?u=${data.uname}`;
+                        }
+                        else{
+                            showError('Error processing data.')
+                        }
+
+                    } catch (error) {
+                        showError(data);
+                    }
+                }
+            }
+        }
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.send(`type=login&data=${JSON.stringify(formData)}`);
+    }
+
 }
 document.getElementById("prev").addEventListener("click",back);
 document.getElementById("next").addEventListener("click",fwd);
@@ -226,7 +279,7 @@ document.getElementById("submit_btn").addEventListener("click",()=>{
                     let data = xhr.response;
                     try {
                         JSON.parse(data);
-                        window.location.href = `index.php?u=${uname}`;
+                        signIn(uname, pwd)
                     } catch (error) {
 
                         showError(data);
@@ -238,6 +291,7 @@ document.getElementById("submit_btn").addEventListener("click",()=>{
         xhr.send(`type=register_user&data=${JSON.stringify(formData)}`);
     }
 });
+
 
 document.querySelectorAll(".input_fields").forEach(element=>{
     element.addEventListener("input",()=>{
@@ -297,6 +351,8 @@ document.querySelectorAll(".input_fields").forEach(element=>{
         }
     });
 });
+
+
 document.querySelectorAll("#pwd,#pwd_repeat").forEach(ells=>{
     ells.addEventListener("blur",()=>{
         if((document.getElementById("pwd").value != document.getElementById("pwd_repeat").value) && (document.getElementById("pwd").value.length>0 && document.getElementById("pwd_repeat").value.length>0)){
@@ -334,6 +390,8 @@ document.querySelectorAll("#pwd,#pwd_repeat").forEach(ells=>{
         }
     });
 });
+
+
 document.querySelectorAll("#pwd,#pwd_repeat").forEach(ells=>{
     ells.addEventListener("input",()=>{
         if((document.getElementById("pwd").value != document.getElementById("pwd_repeat").value) && (document.getElementById("pwd").value.length>0 && document.getElementById("pwd_repeat").value.length>0)){
@@ -354,6 +412,7 @@ document.querySelectorAll("#pwd,#pwd_repeat").forEach(ells=>{
         }
     });
 });
+
 document.getElementById("gender").addEventListener("input",()=>{
     if(document.getElementById("gender").value.length>1){
         document.getElementById("gender").parentElement.getElementsByClassName("fa")[0].classList.remove("fa-question-circle");
@@ -368,9 +427,9 @@ document.getElementById("gender").addEventListener("input",()=>{
 });
 
 document.getElementById("login_btn").addEventListener("click",()=>{
+    let isError = false;
     var uname= document.getElementById("uname_login");
     var pwd= document.getElementById("pwd_login");
-    let isError = false;
 
     let elements = [uname, pwd];
 
@@ -385,42 +444,9 @@ document.getElementById("login_btn").addEventListener("click",()=>{
         }
     });
 
-
     if(!isError){
-        document.getElementById("bc_loading").style.display="block";
-
-
-        var data = {
-            "username": uname.value,
-            "pwd": pwd.value
-        }
-
-
-        let xhr = new XMLHttpRequest();
-        xhr.open("POST", "server/router.php", true);
-        xhr.onprogress = () => {
-            document.getElementById("loading_bar").style.width = `${(xhr.readyState/xhr.DONE)*100}%`;
-        }
-        xhr.onload = ()=>{
-            if(xhr.readyState === XMLHttpRequest.DONE){
-                if(xhr.status === 200){
-                    let data = xhr.response;
-                    console.log(data);
-                    document.getElementById("bc_loading").style.display="none";
-                    
-                    if(data == true){
-                        window.location.href = `index.php?u=${uname.value}`;
-                    }else{
-                        showError(data);
-                    }
-                }
-            }
-        }
-        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xhr.send(`type=login&data=${JSON.stringify(data)}`);
+        signIn(uname.value, pwd.value);
     }
-
-
 });
 
 document.getElementById("gender").value="";
