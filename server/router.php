@@ -35,7 +35,7 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
     
             $user = new User($user_id = 0,$uname = $username, $pwd = $pwd);
             $response = $user->signIn();
-    
+            
             echo $response;
         }
     
@@ -83,5 +83,57 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
 
             echo $response;
         }
+
+        if(isset($_POST['type']) && $_POST['type'] == "deleteProgress" && isset($_POST['data'])){
+            $data = json_decode($_POST['data']);
+
+            $id = $data->id;
+
+            $user = new userAction();
+            $response = $user->deleteProgress($id);
+            echo $response;
+        }
+
+        if(isset($_POST['type']) && $_POST['type'] == "chatAi" && isset($_POST['data'])){
+            $data = json_decode($_POST['data']);
+
+            $text = $data->text;
+
+            $ai = new aiServices();
+            $response = $ai->chatAi($text);
+            echo $response;
+        }
+
+        if(isset($_POST['type']) && $_POST['type'] == "insertMessage" && isset($_POST['data'])){
+            $data = json_decode($_POST['data']);
+
+            if(isset($data->sender) && isset($data->message) && isset($data->timestamp)){
+                $sender = $data->sender;
+                $message = $data->message;
+                $timestamp = $data->timestamp;
+
+                $user = new userAction();
+                $response = $user->sendMessage($sender,$message,$timestamp);
+
+                echo $response;
+            }
+        }
+
+        if(isset($_POST['type']) && $_POST['type'] == "getMessages" && isset($_POST['timestamp'])){
+            $timestamp = $_POST['timestamp'];
+            $user = new userAction();
+            
+            $response = $user->getMessages($timestamp);
+            echo $response;
+        }
+
+        if(isset($_POST['type']) && $_POST['type'] == "analyseImage" && isset($_POST['image'])){
+            $image = $_POST['image'];
+
+            $ai = new aiServices();
+            $response = $ai->analyseImage($image);
+            echo $response;
+        }
+
     }
 }
